@@ -234,7 +234,7 @@ int main(int argc, char *argv[])
     // Set buffer
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
     // Fill buffer
-    glBufferData(GL_ARRAY_BUFFER, 2*4*sizeof(GLfloat), vertices, GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, 4*4*sizeof(GLfloat), vertices, GL_STATIC_DRAW);
 
     // Elements
     GLubyte elements[] = {
