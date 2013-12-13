@@ -166,9 +166,6 @@ static void exit_func(void)
 int main(int argc, char *argv[])
 {
     bcm_host_init();
-
-    // Clear application state
-    memset( state, 0, sizeof( *state ) );
       
     // Start OGLES
     init_ogl(state);
