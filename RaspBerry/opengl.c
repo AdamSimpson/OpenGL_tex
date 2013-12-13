@@ -184,27 +184,25 @@ int main(int argc, char *argv[])
         0.5f, -0.5f,
        -0.5f, -0.5f
     };
-
     // Generate vertex buffer
     GLuint vbo;
     glGenBuffers(1, &vbo);
-
-    // Set active buffer
+    // Set buffer
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
-
-    // Fill active buffer
+    // Fill buffer
     glBufferData(GL_ARRAY_BUFFER, 2*4*sizeof(GLfloat), vertices, GL_STATIC_DRAW);
 
+    // Elements
     GLubyte elements[] = {
         2, 3, 0,
         0, 1, 2
     };
-
-    // Create an element buffer
+    // Generate element buffer
     GLuint ebo;
     glGenBuffers(1, &ebo);
-
+    // Set buffer
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
+    // Fill buffer
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, 2*3*sizeof(GLubyte), elements, GL_STATIC_DRAW);
 
     /////////////////////
