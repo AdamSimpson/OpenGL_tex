@@ -1,7 +1,7 @@
-all: opengl tex
+all: triangle tex
 
-opengl: opengl.c
-	gcc -lglfw3 -lGLEW -framework OpenGL -framework Cocoa -framework IOkit opengl.c -o opengl
+triangle: triangle.c
+	gcc -lglfw3 -lGLEW -framework OpenGL -framework Cocoa -framework IOkit triangle.c -o triangle
 tex: tex.c
 	gcc -lglfw3 -lGLEW -framework OpenGL -framework Cocoa -framework IOkit tex.c -o tex
 clean:
