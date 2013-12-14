@@ -173,7 +173,7 @@ static void exit_func(STATE_T *state)
    printf("close\n");
 } // exit_func()
 
-GLuint create_texture()
+GLuint create_texture(STATE_T *state)
 {
     // Texture handle
     GLuint textureID;
@@ -192,8 +192,9 @@ GLuint create_texture()
 
     // Generate texture
     glGenTextures(1, &textureID);
-  
-    // Bind texture
+
+    // Set texture unit 0 and bind texture
+    glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, textureID);
 
     // Load texture
@@ -218,7 +219,7 @@ int main(int argc, char *argv[])
     init_ogl(&state);
 
     // Create and set texture
-    state.textures[0] = create_texture();
+    state.textures[0] = create_texture(&state);
 
     //////////////////////
     // Setup vertices
@@ -290,14 +291,9 @@ int main(int argc, char *argv[])
     glVertexAttribPointer(state.tex_coord_locations[0], 2, GL_FLOAT, GL_FALSE, 4*sizeof(GL_FLOAT),(void*)(2*sizeof(GL_FLOAT)));
     glEnableVertexAttribArray(state.tex_coord_locations[0]);
 
-    // Get texture location
+    // Specify texture uniform location
     state.texture_locations[0] = glGetUniformLocation(state.program, "tex");
-
-    // Bind texture to unit 0
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, state.textures[0]);
-
-    // Set texture location to texture unit 0
+    // Set tex uniform location to texture unit 0
     glUniform1i(state.texture_locations[0], 0);
 
     // Clear the screen
