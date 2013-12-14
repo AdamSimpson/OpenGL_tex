@@ -24,7 +24,9 @@ const GLchar* fragmentSource =
     "void main() {"
     "   gl_FragColor = texture2D(tex, frag_tex_coord);"
     "}";
-    
+
+#define num_textures 2
+
 typedef struct
 {
     uint32_t screen_width;
@@ -39,12 +41,14 @@ typedef struct
     GLuint program;
 
     // Locations
-    GLint position_location;
-    GLint texture_location;
-    GLint sampler_location;
+    GLint position_locations[num_textures];
+    GLint tex_coord_locations[num_textures];
+    GLint texture_locations[num_textures];
 
-    // Texture handle
-    GLuint textureID;
+    // Texture handles
+    GLuint textures[num_textures];
+
+
 } STATE_T;
 
 static void init_ogl(STATE_T *state);
@@ -182,7 +186,7 @@ GLuint create_texture()
 	  0,  0, 255,
 	255, 255,   0
     };
-    
+   
     // Pixel packing
     glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
@@ -214,7 +218,7 @@ int main(int argc, char *argv[])
     init_ogl(&state);
 
     // Create and set texture
-    state.textureID = create_texture();
+    state.textures[0] = create_texture();
 
     //////////////////////
     // Setup vertices
@@ -277,24 +281,24 @@ int main(int argc, char *argv[])
     glUseProgram(state.program);
 
     // Specify and enable vertex shader position  attribute
-    state.position_location = glGetAttribLocation(state.program, "position");
-    glVertexAttribPointer(state.position_location, 2, GL_FLOAT, GL_FALSE, 4*sizeof(GL_FLOAT), 0);
-    glEnableVertexAttribArray(state.position_location);
+    state.position_locations[0] = glGetAttribLocation(state.program, "position");
+    glVertexAttribPointer(state.position_locations[0], 2, GL_FLOAT, GL_FALSE, 4*sizeof(GL_FLOAT), 0);
+    glEnableVertexAttribArray(state.position_locations[0]);
 
     // Specify and enable vertex shader tex_coord attribute
-    state.texture_location = glGetAttribLocation(state.program, "tex_coord");
-    glVertexAttribPointer(state.texture_location, 2, GL_FLOAT, GL_FALSE, 4*sizeof(GL_FLOAT),(void*)(2*sizeof(GL_FLOAT)));
-    glEnableVertexAttribArray(state.texture_location);
+    state.tex_coord_locations[0] = glGetAttribLocation(state.program, "tex_coord");
+    glVertexAttribPointer(state.tex_coord_locations[0], 2, GL_FLOAT, GL_FALSE, 4*sizeof(GL_FLOAT),(void*)(2*sizeof(GL_FLOAT)));
+    glEnableVertexAttribArray(state.tex_coord_locations[0]);
 
-    // Set sampler location
-    state.sampler_location = glGetUniformLocation(state.program, "tex");
+    // Get texture location
+    state.texture_locations[0] = glGetUniformLocation(state.program, "tex");
 
     // Bind texture to unit 0
     glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, state.textureID);
+    glBindTexture(GL_TEXTURE_2D, state.textures[0]);
 
-    // Set sampler to texture unit 0
-    glUniform1i(state.sampler_location, 0);
+    // Set texture location to texture unit 0
+    glUniform1i(state.texture_locations[0], 0);
 
     // Clear the screen
     glClearColor(1.0f, 0.0f, 0.0f, 1.0f);
