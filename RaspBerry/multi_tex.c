@@ -314,14 +314,14 @@ int main(int argc, char *argv[])
     // Get tex uniform location
     state.tex_location = glGetUniformLocation(state.program, "tex");
 
-
-   // Clear the screen
-    glClearColor(1.0f, 0.0f, 0.0f, 1.0f);
-    glClear(GL_COLOR_BUFFER_BIT);
-
     // Event loop
     while(!terminate)
     {
+
+        // Clear the screen
+        glClearColor(1.0f, 0.0f, 0.0f, 1.0f);
+        glClear(GL_COLOR_BUFFER_BIT);
+
         // Draw image 0
         glVertexAttribPointer(state.position_location, 2, GL_FLOAT, GL_FALSE, 4*sizeof(GL_FLOAT), 0);
         glEnableVertexAttribArray(state.position_location);
