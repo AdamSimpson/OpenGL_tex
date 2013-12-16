@@ -41,9 +41,9 @@ typedef struct
     GLuint program;
 
     // Locations
-    GLint position_locations[num_textures];
-    GLint tex_coord_locations[num_textures];
-    GLint texture_locations[num_textures];
+    GLint position_location;
+    GLint tex_coord_location;
+    GLint texture_location;
 
     // Texture handles
     GLuint textures[num_textures];
@@ -53,7 +53,7 @@ typedef struct
 
 static void init_ogl(STATE_T *state);
 static void exit_func(STATE_T *state);
-GLuint create_texture();
+void create_textures();
 
 static volatile int terminate;
 
@@ -173,17 +173,14 @@ static void exit_func(STATE_T *state)
    printf("close\n");
 } // exit_func()
 
-GLuint create_texture(STATE_T *state)
+void create_textures(STATE_T *state)
 {
-    // Texture handle
-    GLuint textureID;
-
-    // Image
+    // First image
     GLubyte pixels[] =
     {
-        255,  0,   0,
-          0,255,   0,
-	  0,  0, 255,
+        255,   0,   0,
+          0, 255,   0,
+	  0,   0, 255,
 	255, 255,   0
     };
    
@@ -191,22 +188,39 @@ GLuint create_texture(STATE_T *state)
     glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
     // Generate texture
-    glGenTextures(1, &textureID);
+    glGenTextures(num_textures, state->textures);
 
     // Set texture unit 0 and bind texture
     glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, textureID);
+    glBindTexture(GL_TEXTURE_2D, state->textures[0]);
 
     // Load texture
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, 2, 2, 0, GL_RGB, GL_UNSIGNED_BYTE, pixels);
 
     // Set filtering modes
-//    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
-//    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
-    return textureID;
+    // Second image
+    GLubyte pixels2[] =
+    {
+        255, 255,    0,
+          0, 255,   125,
+	125,   0  , 255,
+	255,   0,   0
+    };
+ 
+    // Set texture unit 1 and bind texture
+    glActiveTexture(GL_TEXTURE1);
+    glBindTexture(GL_TEXTURE_2D, state->textures[1]);
+
+    // Load texture
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, 2, 2, 0, GL_RGB, GL_UNSIGNED_BYTE, pixels2);
+
+     // Set filtering modes
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
 }
 
 int main(int argc, char *argv[])
@@ -219,7 +233,7 @@ int main(int argc, char *argv[])
     init_ogl(&state);
 
     // Create and set texture
-    state.textures[0] = create_texture(&state);
+    create_textures(&state);
 
     //////////////////////
     // Setup vertices
@@ -227,6 +241,12 @@ int main(int argc, char *argv[])
 
     // Vertices: Pos(x,y) Tex(x,y)
     float vertices[] = {
+        // Image 0 vertices
+        -0.5f,  0.5f, 0.0f, 0.0f, // Top left
+         0.5f,  0.5f, 1.0f, 0.0f, // Top right
+         0.5f, -0.5f, 1.0f, 1.0f, // Bottom right
+	-0.5f, -0.5f, 0.0f, 1.0f,  // Bottom left
+        // Image 1 vertices
         -0.5f,  0.5f, 0.0f, 0.0f, // Top left
          0.5f,  0.5f, 1.0f, 0.0f, // Top right
          0.5f, -0.5f, 1.0f, 1.0f, // Bottom right
@@ -239,7 +259,7 @@ int main(int argc, char *argv[])
     // Set buffer
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
     // Fill buffer
-    glBufferData(GL_ARRAY_BUFFER, 4*4*sizeof(GLfloat), vertices, GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, num_textures*4*4*sizeof(GLfloat), vertices, GL_STATIC_DRAW);
 
     // Elements
     GLubyte elements[] = {
@@ -280,34 +300,42 @@ int main(int argc, char *argv[])
     // Link and use program
     glLinkProgram(state.program);
     glUseProgram(state.program);
+    check();
 
-    // Specify and enable vertex shader position  attribute
-    state.position_locations[0] = glGetAttribLocation(state.program, "position");
-    glVertexAttribPointer(state.position_locations[0], 2, GL_FLOAT, GL_FALSE, 4*sizeof(GL_FLOAT), 0);
-    glEnableVertexAttribArray(state.position_locations[0]);
+    // Get position location
+    state.position_location = glGetAttribLocation(state.program, "position");
+    // Get tex_coord location
+    state.tex_coord_location = glGetAttribLocation(state.program, "tex_coord");
+    // Get texture uniform location
+    state.texture_location = glGetUniformLocation(state.program, "tex");
 
-    // Specify and enable vertex shader tex_coord attribute
-    state.tex_coord_locations[0] = glGetAttribLocation(state.program, "tex_coord");
-    glVertexAttribPointer(state.tex_coord_locations[0], 2, GL_FLOAT, GL_FALSE, 4*sizeof(GL_FLOAT),(void*)(2*sizeof(GL_FLOAT)));
-    glEnableVertexAttribArray(state.tex_coord_locations[0]);
 
-    // Specify texture uniform location
-    state.texture_locations[0] = glGetUniformLocation(state.program, "tex");
-    // Set tex uniform location to texture unit 0
-    glUniform1i(state.texture_locations[0], 0);
-
-    // Clear the screen
+   // Clear the screen
     glClearColor(1.0f, 0.0f, 0.0f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT);
 
     // Event loop
     while(!terminate)
     {
-        // Draw square
+        // Draw image 0
+        glVertexAttribPointer(state.position_location, 2, GL_FLOAT, GL_FALSE, 4*sizeof(GL_FLOAT), 0);
+        glEnableVertexAttribArray(state.position_location);
+        glVertexAttribPointer(state.tex_coord_location, 2, GL_FLOAT, GL_FALSE, 4*sizeof(GL_FLOAT),(void*)(2*sizeof(GL_FLOAT)));
+        glEnableVertexAttribArray(state.tex_coord_location);
+        glUniform1i(state.texture_location, 1);
+        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_BYTE, 0);
+
+        // Draw image 1
+        glVertexAttribPointer(state.position_location, 2, GL_FLOAT, GL_FALSE, 4*sizeof(GL_FLOAT), (void*)(4*4*sizeof(GL_FLOAT)));
+        glEnableVertexAttribArray(state.position_location);
+        glVertexAttribPointer(state.tex_coord_location, 2, GL_FLOAT, GL_FALSE, 4*sizeof(GL_FLOAT),(void*)(4*4*sizeof(GL_FLOAT)+2*sizeof(GL_FLOAT)));
+        glEnableVertexAttribArray(state.tex_coord_location);
+        glUniform1i(state.texture_location, 1);
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_BYTE, 0);
 
         // Swap buffers
         eglSwapBuffers(state.display, state.surface);
+
     }
 
     // Tidy up
