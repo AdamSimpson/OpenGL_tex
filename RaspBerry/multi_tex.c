@@ -48,7 +48,9 @@ typedef struct
     // Texture handles
     GLuint textures[num_textures];
 
-
+    // Texture attributes
+    uint32_t tex_width;
+    uint32_t tex_height;
 } STATE_T;
 
 static void init_ogl(STATE_T *state);
@@ -175,15 +177,19 @@ static void exit_func(STATE_T *state)
 
 void create_textures(STATE_T *state)
 {
+    int i,j;
+
+    state->tex_width = 800;
+    state->tex_height = 1080;
+
     // First image
-    GLubyte pixels[] =
-    {
-        255,   0,   0,
-          0, 255,   0,
-	  0,   0, 255,
-	255, 255,   0
-    };
-   
+    GLubyte *pixels = malloc(state->tex_width*state->tex_height*sizeof(GLubyte));
+    for(i=0; i<state->tex_height; i++) {
+        for(j=0; j<state->tex_width; j++) {
+            pixels[i*state->tex_width + j] = 0;
+        }
+    }
+      
     // Pixel packing
     glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
@@ -195,27 +201,26 @@ void create_textures(STATE_T *state)
     glBindTexture(GL_TEXTURE_2D, state->textures[0]);
 
     // Load texture
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, 2, 2, 0, GL_RGB, GL_UNSIGNED_BYTE, pixels);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_LUMINANCE, state->tex_width, state->tex_height, 0, GL_LUMINANCE, GL_UNSIGNED_BYTE, pixels);
 
     // Set filtering modes
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
     // Second image
-    GLubyte pixels2[] =
-    {
-        255, 255,    0,
-          0, 255,   125,
-	125,   0  , 255,
-	255,   0,   0
-    };
+    GLubyte *pixels2 = malloc(state->tex_width*state->tex_height*sizeof(GLubyte));
+    for(i=0; i<state->tex_height; i++) {
+        for(j=0; j<state->tex_width; j++) {
+            pixels2[i*state->tex_width + j] = 255;
+        }
+    }
  
     // Set texture unit 1 and bind texture
     glActiveTexture(GL_TEXTURE1);
     glBindTexture(GL_TEXTURE_2D, state->textures[1]);
 
     // Load texture
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, 2, 2, 0, GL_RGB, GL_UNSIGNED_BYTE, pixels2);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_LUMINANCE, state->tex_width, state->tex_height, 0, GL_LUMINANCE, GL_UNSIGNED_BYTE, pixels2);
 
      // Set filtering modes
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
