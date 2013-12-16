@@ -43,7 +43,7 @@ typedef struct
     // Locations
     GLint position_location;
     GLint tex_coord_location;
-    GLint texture_location;
+    GLint tex_location;
 
     // Texture handles
     GLuint textures[num_textures];
@@ -242,15 +242,15 @@ int main(int argc, char *argv[])
     // Vertices: Pos(x,y) Tex(x,y)
     float vertices[] = {
         // Image 0 vertices
-        -0.5f,  0.5f, 0.0f, 0.0f, // Top left
-         0.5f,  0.5f, 1.0f, 0.0f, // Top right
-         0.5f, -0.5f, 1.0f, 1.0f, // Bottom right
-	-0.5f, -0.5f, 0.0f, 1.0f,  // Bottom left
+        -1.0f,  1.0f, 0.0f, 0.0f, // Top left
+        -0.01f, 1.0f, 1.0f, 0.0f, // Top right
+        -0.01f,-1.0f, 1.0f, 1.0f, // Bottom right
+	-1.0f, -1.0f, 0.0f, 1.0f,  // Bottom left
         // Image 1 vertices
-        -0.5f,  0.5f, 0.0f, 0.0f, // Top left
-         0.5f,  0.5f, 1.0f, 0.0f, // Top right
-         0.5f, -0.5f, 1.0f, 1.0f, // Bottom right
-	-0.5f, -0.5f, 0.0f, 1.0f  // Bottom left
+         0.01f, 1.0f, 0.0f, 0.0f, // Top left
+         1.0f,  1.0f, 1.0f, 0.0f, // Top right
+         1.0f, -1.0f, 1.0f, 1.0f, // Bottom right
+	 0.01f,-1.0f, 0.0f, 1.0f  // Bottom left
     };
 
     // Generate vertex buffer
@@ -306,8 +306,8 @@ int main(int argc, char *argv[])
     state.position_location = glGetAttribLocation(state.program, "position");
     // Get tex_coord location
     state.tex_coord_location = glGetAttribLocation(state.program, "tex_coord");
-    // Get texture uniform location
-    state.texture_location = glGetUniformLocation(state.program, "tex");
+    // Get tex uniform location
+    state.tex_location = glGetUniformLocation(state.program, "tex");
 
 
    // Clear the screen
@@ -322,7 +322,7 @@ int main(int argc, char *argv[])
         glEnableVertexAttribArray(state.position_location);
         glVertexAttribPointer(state.tex_coord_location, 2, GL_FLOAT, GL_FALSE, 4*sizeof(GL_FLOAT),(void*)(2*sizeof(GL_FLOAT)));
         glEnableVertexAttribArray(state.tex_coord_location);
-        glUniform1i(state.texture_location, 1);
+        glUniform1i(state.tex_location, 0);
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_BYTE, 0);
 
         // Draw image 1
@@ -330,7 +330,7 @@ int main(int argc, char *argv[])
         glEnableVertexAttribArray(state.position_location);
         glVertexAttribPointer(state.tex_coord_location, 2, GL_FLOAT, GL_FALSE, 4*sizeof(GL_FLOAT),(void*)(4*4*sizeof(GL_FLOAT)+2*sizeof(GL_FLOAT)));
         glEnableVertexAttribArray(state.tex_coord_location);
-        glUniform1i(state.texture_location, 1);
+        glUniform1i(state.tex_location, 1);
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_BYTE, 0);
 
         // Swap buffers
