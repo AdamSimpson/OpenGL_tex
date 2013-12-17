@@ -13,23 +13,6 @@
 
 #include "bcm_host.h"
 
-// Shader source
-const GLchar* vertexSource =
-    "attribute vec2 position;"
-    "attribute vec2 tex_coord;"
-    "varying vec2 frag_tex_coord;"
-    "void main() {"
-    "   gl_Position = vec4(position, 0.0, 1.0);"
-    "   frag_tex_coord = tex_coord;"
-    "}";
-const GLchar* fragmentSource =
-    "precision mediump float;"
-    "varying vec2 frag_tex_coord;"
-    "uniform sampler2D tex;"
-    "void main() {"
-    "   gl_FragColor = texture2D(tex, frag_tex_coord);"
-    "}";
-
 void create_textures(STATE_T *state)
 {
     int i,j;
@@ -135,6 +118,23 @@ void create_vertices()
 
 void create_shaders(STATE_T *state)
 {
+    // Shader source
+    const GLchar* vertexSource =
+        "attribute vec2 position;"
+        "attribute vec2 tex_coord;"
+        "varying vec2 frag_tex_coord;"
+        "void main() {"
+        "   gl_Position = vec4(position, 0.0, 1.0);"
+        "   frag_tex_coord = tex_coord;"
+        "}";
+    const GLchar* fragmentSource =
+        "precision mediump float;"
+        "varying vec2 frag_tex_coord;"
+        "uniform sampler2D tex;"
+        "void main() {"
+        "   gl_FragColor = texture2D(tex, frag_tex_coord);"
+        "}";
+
     // Compile vertex shader
     GLuint vertexShader = glCreateShader(GL_VERTEX_SHADER);
     glShaderSource(vertexShader, 1, &vertexSource, NULL);
