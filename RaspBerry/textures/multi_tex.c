@@ -72,9 +72,9 @@ void create_textures(STATE_T *state)
 
 }
 
-void update_texture_row(GLuint texture, uint32_t row, GLubyte *row_pixels)
+void update_texture_row(STATE_T *state, GLuint texture, GLsizei row, GLubyte *row_pixels)
 {
-
+    glTexSubImage2D(GL_TEXTURE_2D, 0, 0, row, state->tex_width, 1, GL_LUMINANCE, GL_UNSIGNED_BYTE, row_pixels);
 }
 
 void create_vertices()
@@ -203,7 +203,7 @@ int main(int argc, char *argv[])
     // Start OGLES
     init_ogl(&state.egl_state);
 
-    // Create and set texture
+    // Create and set textures
     create_textures(&state);
 
     // Create and set vertices
