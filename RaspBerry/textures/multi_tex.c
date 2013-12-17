@@ -9,6 +9,8 @@
 #include "EGL/egl.h"
 #include "EGL/eglext.h"
 
+#include "linux/input.h"
+
 #include "bcm_host.h"
 
 // Shader source
@@ -87,10 +89,17 @@ void create_textures(STATE_T *state)
 
 }
 
+void update_texture_row(GLuint texture, uint32_t row, GLubyte *row_pixels)
+{
+
+}
+
 int main(int argc, char *argv[])
 {
+    // Setup initial state
     STATE_T state;
     memset(&state, 0, sizeof(STATE_T));
+    state.egl_state.keyboard_fd = -1;
 
     bcm_host_init();
       
@@ -107,15 +116,15 @@ int main(int argc, char *argv[])
     // Vertices: Pos(x,y) Tex(x,y)
     float vertices[] = {
         // Image 0 vertices
-        -1.0f,  1.0f, 0.0f, 0.0f, // Top left
-        -0.01f, 1.0f, 1.0f, 0.0f, // Top right
-        -0.01f,-1.0f, 1.0f, 1.0f, // Bottom right
-	-1.0f, -1.0f, 0.0f, 1.0f,  // Bottom left
+        -1.0f,   1.0f, 0.0f, 0.0f, // Top left
+        -0.005f, 1.0f, 1.0f, 0.0f, // Top right
+        -0.005f,-1.0f, 1.0f, 1.0f, // Bottom right
+	-1.0f,  -1.0f, 0.0f, 1.0f,  // Bottom left
         // Image 1 vertices
-         0.01f, 1.0f, 0.0f, 0.0f, // Top left
-         1.0f,  1.0f, 1.0f, 0.0f, // Top right
-         1.0f, -1.0f, 1.0f, 1.0f, // Bottom right
-	 0.01f,-1.0f, 0.0f, 1.0f  // Bottom left
+         0.005f, 1.0f, 0.0f, 0.0f, // Top left
+         1.0f,   1.0f, 1.0f, 0.0f, // Top right
+         1.0f,  -1.0f, 1.0f, 1.0f, // Bottom right
+	 0.005f,-1.0f, 0.0f, 1.0f  // Bottom left
     };
 
     // Generate vertex buffer
@@ -200,6 +209,10 @@ int main(int argc, char *argv[])
         // Swap buffers
         egl_swap(&state.egl_state);
 
+        // Check for keyboard input
+	int key_press = get_key_press(&state.egl_state);	
+	if(key_press == KEY_Q)
+	    state.terminate=1;
     }
 
     // Tidy up
