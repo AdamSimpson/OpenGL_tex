@@ -26,7 +26,7 @@ typedef struct
     uint32_t tex_width;
     uint32_t tex_height;
 
-    volatile int terminate;
+    int terminate;
 } STATE_T;
 
 void create_textures();

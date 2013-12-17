@@ -98,6 +98,7 @@ int main(int argc, char *argv[])
 {
     // Setup initial state
     STATE_T state;
+    memset(&state, 0, sizeof(STATE_T));
 
     bcm_host_init();
       
