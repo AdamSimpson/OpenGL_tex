@@ -30,8 +30,8 @@ void showlog(GLint shader)
 void init_ogl(EGL_STATE_T *state)
 {
     // Initialize struct
-    memset(&state, 0, sizeof(STATE_T));
-    state.egl_state.keyboard_fd = -1;
+    memset(state, 0, sizeof(EGL_STATE_T));
+    state->keyboard_fd = -1;
 
     int32_t success = 0;
     EGLBoolean result;
