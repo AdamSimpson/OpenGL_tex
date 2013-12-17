@@ -94,24 +94,8 @@ void update_texture_row(GLuint texture, uint32_t row, GLubyte *row_pixels)
 
 }
 
-int main(int argc, char *argv[])
+void create_vertices()
 {
-    // Setup initial state
-    STATE_T state;
-    memset(&state, 0, sizeof(STATE_T));
-
-    bcm_host_init();
-      
-    // Start OGLES
-    init_ogl(&state.egl_state);
-
-    // Create and set texture
-    create_textures(&state);
-
-    //////////////////////
-    // Setup vertices
-    /////////////////////
-
     // Vertices: Pos(x,y) Tex(x,y)
     float vertices[] = {
         // Image 0 vertices
@@ -147,10 +131,10 @@ int main(int argc, char *argv[])
     // Fill buffer
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, 2*3*sizeof(GLubyte), elements, GL_STATIC_DRAW);
 
-    /////////////////////
-    // Setup shaders
-    ////////////////////
+}
 
+void create_shaders(STATE_T *state)
+{
     // Compile vertex shader
     GLuint vertexShader = glCreateShader(GL_VERTEX_SHADER);
     glShaderSource(vertexShader, 1, &vertexSource, NULL);
@@ -166,44 +150,73 @@ int main(int argc, char *argv[])
     showlog(fragmentShader);
 
     // Create shader program
-    state.program = glCreateProgram();
-    glAttachShader(state.program, vertexShader);
-    glAttachShader(state.program, fragmentShader);
+    state->program = glCreateProgram();
+    glAttachShader(state->program, vertexShader);
+    glAttachShader(state->program, fragmentShader);
    
     // Link and use program
-    glLinkProgram(state.program);
-    glUseProgram(state.program);
+    glLinkProgram(state->program);
+    glUseProgram(state->program);
     check();
 
     // Get position location
-    state.position_location = glGetAttribLocation(state.program, "position");
+    state->position_location = glGetAttribLocation(state->program, "position");
     // Get tex_coord location
-    state.tex_coord_location = glGetAttribLocation(state.program, "tex_coord");
+    state->tex_coord_location = glGetAttribLocation(state->program, "tex_coord");
     // Get tex uniform location
-    state.tex_location = glGetUniformLocation(state.program, "tex");
+    state->tex_location = glGetUniformLocation(state->program, "tex");
+}
+
+void draw_textures(STATE_T *state)
+{
+    glClearColor(0.5f, 0.5f, 0.5f, 1.0f);
+    glClear(GL_COLOR_BUFFER_BIT);
+
+    // Size of each vertex in bytes
+    size_t vert_size = 4*sizeof(GL_FLOAT);
+
+    // Draw image 0
+    glVertexAttribPointer(state->position_location, 2, GL_FLOAT, GL_FALSE, vert_size, 0);
+    glEnableVertexAttribArray(state->position_location);
+    glVertexAttribPointer(state->tex_coord_location, 2, GL_FLOAT, GL_FALSE, vert_size,(void*)(2*sizeof(GL_FLOAT)));
+    glEnableVertexAttribArray(state->tex_coord_location);
+    glUniform1i(state->tex_location, 0);
+    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_BYTE, 0);
+
+    // Draw image 1
+    glVertexAttribPointer(state->position_location, 2, GL_FLOAT, GL_FALSE, vert_size, (void*)(4*vert_size));
+    glEnableVertexAttribArray(state->position_location);
+    glVertexAttribPointer(state->tex_coord_location, 2, GL_FLOAT, GL_FALSE, vert_size,(void*)(4*vert_size+2*sizeof(GL_FLOAT)));
+    glEnableVertexAttribArray(state->tex_coord_location);
+    glUniform1i(state->tex_location, 1);
+    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_BYTE, 0);
+}
+
+int main(int argc, char *argv[])
+{
+    // Setup initial state
+    STATE_T state;
+    memset(&state, 0, sizeof(STATE_T));
+
+    bcm_host_init();
+      
+    // Start OGLES
+    init_ogl(&state.egl_state);
+
+    // Create and set texture
+    create_textures(&state);
+
+    // Create and set vertices
+    create_vertices();
+
+    // Create and set shaders
+    create_shaders(&state);
 
     // Event loop
     while(!state.terminate)
     {
-        // Clear the screen
-        glClearColor(0.5f, 0.5f, 0.5f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT);
-
-        // Draw image 0
-        glVertexAttribPointer(state.position_location, 2, GL_FLOAT, GL_FALSE, 4*sizeof(GL_FLOAT), 0);
-        glEnableVertexAttribArray(state.position_location);
-        glVertexAttribPointer(state.tex_coord_location, 2, GL_FLOAT, GL_FALSE, 4*sizeof(GL_FLOAT),(void*)(2*sizeof(GL_FLOAT)));
-        glEnableVertexAttribArray(state.tex_coord_location);
-        glUniform1i(state.tex_location, 0);
-        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_BYTE, 0);
-
-        // Draw image 1
-        glVertexAttribPointer(state.position_location, 2, GL_FLOAT, GL_FALSE, 4*sizeof(GL_FLOAT), (void*)(4*4*sizeof(GL_FLOAT)));
-        glEnableVertexAttribArray(state.position_location);
-        glVertexAttribPointer(state.tex_coord_location, 2, GL_FLOAT, GL_FALSE, 4*sizeof(GL_FLOAT),(void*)(4*4*sizeof(GL_FLOAT)+2*sizeof(GL_FLOAT)));
-        glEnableVertexAttribArray(state.tex_coord_location);
-        glUniform1i(state.tex_location, 1);
-        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_BYTE, 0);
+	// Draw textures
+	draw_textures(&state);
 
         // Swap buffers
         egl_swap(&state.egl_state);

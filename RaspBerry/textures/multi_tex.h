@@ -29,6 +29,9 @@ typedef struct
     int terminate;
 } STATE_T;
 
-void create_textures();
+void create_textures(STATE_T *state);
+void create_vertices();
+void create_shaders(STATE_T *state);
+void draw_textures(STATE_T *state);
 
 #endif
