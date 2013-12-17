@@ -9,10 +9,11 @@ typedef struct {
     uint32_t screen_width;
     uint32_t screen_height;
 
-    // OpenGL|ES objects
     EGLDisplay display;
     EGLSurface surface;
     EGLContext context;
+
+    int keyboard_fd;
 } EGL_STATE_T;
 
 
@@ -21,6 +22,6 @@ void exit_func(EGL_STATE_T *state);
 void showlog(GLint shader);
 void egl_swap(EGL_STATE_T *state);
 void check();
-int get_key_press();
+int get_key_press(EGL_STATE_T *state);
 
 #endif

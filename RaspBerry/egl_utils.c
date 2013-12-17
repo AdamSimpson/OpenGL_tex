@@ -135,21 +135,24 @@ void exit_func(EGL_STATE_T *state)
    eglDestroyContext( state->display, state->context );
    eglTerminate( state->display );
 
+   close(state->keyboard_fd);
+
    printf("close\n");
 } // exit_func()
 
-int get_key_press()
+int get_key_press(EGL_STATE_T *state)
 {
-    int fd = -1;
-    if (fd<0) {
-       fd = open("/dev/input/event0",O_RDONLY|O_NONBLOCK);
-    }
-    if (fd>=0) {
+    int key_code = -1;
+
+    // Open file containing keyboard events
+    if (state->keyboard_fd < 0) 
+        state->keyboard_fd = open("/dev/input/event0",O_RDONLY|O_NONBLOCK);
+    if (state->keyboard_fd >= 0) {
         struct input_event event;
-        int bytes = read(fd, &event, sizeof(event));
-        if (bytes < (int)sizeof(event))
-	    return -1;
-	else
-	    return event.value;
-   }
+        read(state->keyboard_fd, &event, sizeof(struct input_event));
+	if(event.type == EV_KEY)
+	    key_code = (int)event.code;
+    }
+
+    return key_code;
 }
