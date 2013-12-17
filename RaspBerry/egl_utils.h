@@ -21,5 +21,6 @@ void exit_func(EGL_STATE_T *state);
 void showlog(GLint shader);
 void egl_swap(EGL_STATE_T *state);
 void check();
+int get_key_press();
 
 #endif

@@ -8,6 +8,9 @@
 #include "EGL/egl.h"
 #include "EGL/eglext.h"
 
+#include "fcntl.h"
+#include "linux/input.h"
+
 #include "bcm_host.h"
 
 void check()
@@ -134,3 +137,19 @@ void exit_func(EGL_STATE_T *state)
 
    printf("close\n");
 } // exit_func()
+
+int get_key_press()
+{
+    int fd = -1;
+    if (fd<0) {
+       fd = open("/dev/input/event0",O_RDONLY|O_NONBLOCK);
+    }
+    if (fd>=0) {
+        struct input_event event;
+        int bytes = read(fd, &event, sizeof(event));
+        if (bytes < (int)sizeof(event))
+	    return -1;
+	else
+	    return event.value;
+   }
+}
