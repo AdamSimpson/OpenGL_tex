@@ -1,4 +1,4 @@
-#include <stdlib.h>
+
 #include <stdio.h>
 #include <assert.h>
 
@@ -72,9 +72,16 @@ void create_textures(STATE_T *state)
 
 }
 
-void update_texture_row(STATE_T *state, GLuint texture, GLsizei row, GLubyte *row_pixels)
+void update_texture_row(STATE_T *state, GLuint texture, GLenum tex_unit, GLsizei row, GLubyte *row_pixels)
 {
+    glActiveTexture(tex_unit);
     glTexSubImage2D(GL_TEXTURE_2D, 0, 0, row, state->tex_width, 1, GL_LUMINANCE, GL_UNSIGNED_BYTE, row_pixels);
+}
+
+void update_texture_rows(STATE_T *state, GLuint texture, GLenum tex_unit, GLsizei row, GLubyte *row_pixels)
+{
+    glActiveTexture(tex_unit);
+    glTexSubImage2D(GL_TEXTURE_2D, 0, 0, row, state->tex_width, 10, GL_LUMINANCE, GL_UNSIGNED_BYTE, row_pixels);
 }
 
 void create_vertices()
@@ -212,9 +219,29 @@ int main(int argc, char *argv[])
     // Create and set shaders
     create_shaders(&state);
 
+    //////////////////////////////
+    // Testing only
+    ////////////////////////////////
+    int i = 0;
+    GLubyte *row = malloc(state.tex_width*sizeof(GLubyte));
+    memset(row, 0, state.tex_width*sizeof(GLubyte));
+    GLubyte *row2 = malloc(10*state.tex_width*sizeof(GLubyte));
+    memset(row2, 255, 10*state.tex_width*sizeof(GLubyte)); 
+
     // Event loop
     while(!state.terminate)
     {
+       ///////////////////////////
+       // Testing only
+       ///////////////////////
+	glFlush();
+       if(i < state.tex_height) {
+        // Testing row update
+        update_texture_row(&state, state.textures[1], GL_TEXTURE1, i, row);
+        update_texture_rows(&state, state.textures[0], GL_TEXTURE0, i*10, row2);
+        i++;
+        }
+
 	// Draw textures
 	draw_textures(&state);
 
@@ -226,6 +253,7 @@ int main(int argc, char *argv[])
 	if(key_press == KEY_Q)
 	    state.terminate=1;
     }
+
 
     // Tidy up
     exit_func(&state.egl_state);

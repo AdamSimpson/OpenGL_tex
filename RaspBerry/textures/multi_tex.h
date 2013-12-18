@@ -33,6 +33,6 @@ void create_textures(STATE_T *state);
 void create_vertices();
 void create_shaders(STATE_T *state);
 void draw_textures(STATE_T *state);
-void update_texture_row(STATE_T *state, GLuint texture, GLsizei row, GLubyte *row_pixels);
+void update_texture_row(STATE_T *state, GLuint texture, GLenum tex_unit, GLsizei row, GLubyte *row_pixels);
 
 #endif
